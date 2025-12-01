@@ -14,7 +14,7 @@ variable "db_user" {
 variable "db_password" {
   description = "PostgreSQL password (WARNING: Simulated, do not use in Production!)"
   type        = string
-  default     = "strongpassword123"
+  default     = "newstrongpassword456"
   sensitive   = true
 }
 
