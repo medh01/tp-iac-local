@@ -1,0 +1,50 @@
+name: Terraform IaC Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  terraform:
+    name: 'Terraform CI/CD'
+    runs-on: ubuntu-latest
+    
+    steps:
+    # Step 1: Checkout the repository code
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    # Step 2: Setup Terraform CLI
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.6.0
+
+    # Step 3: Initialize Terraform (DLC: Initialization)
+    - name: Terraform Init
+      run: terraform init
+
+    # Step 4: Validate Terraform configuration
+    - name: Terraform Validate
+      run: terraform validate
+
+    # Step 5: Format check
+    - name: Terraform Format Check
+      run: terraform fmt -check
+      continue-on-error: true
+
+    # Step 6: Plan the deployment (DLC: Planning)
+    - name: Terraform Plan
+      id: plan
+      run: terraform plan -no-color -input=false
+      continue-on-error: false
+
+    # Step 7: Apply the deployment (DLC: Apply)
+    # Only runs if Plan succeeds and only on push to main
+    - name: Terraform Apply
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      run: terraform apply -auto-approve -input=false
