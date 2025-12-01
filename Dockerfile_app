@@ -1,0 +1,29 @@
+# Use a lightweight base image (Alpine)
+FROM alpine:latest
+
+# Update and install Nginx web server
+RUN apk update && \
+    apk add nginx && \
+    rm -rf /var/cache/apk/*
+
+# Create necessary directories
+RUN mkdir -p /run/nginx /var/www/html
+
+# Create a simple HTML page as deployment proof
+RUN echo "<h1>Application Deployed via Terraform IaC!</h1>" > /var/www/html/index.html
+
+# Create custom nginx configuration to serve from /var/www/html
+RUN echo 'server { \
+    listen 80 default_server; \
+    root /var/www/html; \
+    index index.html; \
+    location / { \
+        try_files $uri $uri/ =404; \
+    } \
+}' > /etc/nginx/http.d/default.conf
+
+# Expose the default Nginx port
+EXPOSE 80
+
+# Start Nginx in non-daemon mode
+CMD ["nginx", "-g", "daemon off;"]
